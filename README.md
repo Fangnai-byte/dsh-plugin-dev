@@ -21,13 +21,29 @@ references/
 
 ## 安装
 
-把整个目录放进 AstrBot 的 skills 目录：
+**先分清两个东西**：本仓库是一个 **AstrBot Skill**（一份给模型看的参考资料），它的**内容**讲的是 dsh 插件开发。
+它本身不是 dsh 插件，装进 dsh 不会有任何效果；dsh 插件另有自己的位置（见下一节）。
+
+把它作为 Skill 装进 AstrBot 的 skills 目录：
 
 ```
 <AstrBot>/data/skills/dsh-plugin-dev/
 ```
 
-放到该位置后，AstrBot 会把它作为一个 Skill 提供给模型；也可以让它作为参考资料直接阅读。
+放到该位置后，AstrBot 会把它作为一个 Skill 提供给模型；也可以直接当文本资料阅读（例如在别的终端里
+打开 `SKILL.md` 边看边写），此时不需要任何安装步骤。
+
+### 那 dsh 插件装在哪
+
+dsh 插件是 npm 包，安装位置是 dsh 的插件目录与 profile，而不是 AstrBot：
+
+```
+<dsh>/plugins/<plugin-name>/                插件本体
+<dsh>/profiles/<profile>/node_modules/...   profile 里的链接
+<dsh>/profiles/<profile>/package.json       dsh.profile.bundles 与 dependencies
+```
+
+三处同时成立插件才会被加载，具体步骤与判据见 `references/install-and-verify.md`。
 
 ## 覆盖范围
 
