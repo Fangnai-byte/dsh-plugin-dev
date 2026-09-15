@@ -18,12 +18,12 @@ Handlers serve whatever the plugin needs: JSON status endpoints, images, per-fil
 
 ```js
 ctx.on('llm/stream', (options, next) => {
-  // read the request: it is deep-frozen, so inspect it and decide, do not rewrite it
+  // read the request: treat it as immutable, inspect it and decide, do not rewrite it
   return next();
 });
 ```
 
-- The request object handed to the hook is deep-frozen. Reading it (routing, gating, accounting) works; assigning fields does not. Still requires actual verification against the serialized request in your pipeline.
+- Requests built by the agent loop are deep-frozen: the loop wraps the request in `deepFreeze` and tags it with `markAgentLoopRequest`, and `dsh-agent-loop`'s invariant asserts `Object.isFrozen` on tagged requests. Requests from other callers (a title generator or any code calling the llm service directly) carry no such tag and are only bound by the immutable-creation contract. Either way, inspect and decide; do not rewrite.
 - Chunks arrive as token deltas.
 - Protocol invariant: the final `usage` arrives before the terminating `finish`. Any wrapper must keep that order.
 - Pre-request rejection is legitimate: throwing from the hook blocks the call, which is how a quota or budget gate refuses a request.
