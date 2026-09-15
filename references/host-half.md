@@ -31,8 +31,17 @@ ctx.on('llm/stream', (options, next) => {
 ## Effect and logging conventions
 
 - Register timers, listeners, file handles, and routes through `ctx.effect` so plugin unload restores the prior state instead of leaking.
-- Log through `internals.logger ?? ctx.logger` with a `[plugin-name]` prefix.
+- Log through `ctx.logger` with a `[plugin-name]` prefix.
 
 ## Injection
 
 `ctx.inject(['webServer'], (ctx) => { ... })` defers plugin setup until the named services exist. Always wrap service-dependent setup this way instead of reading services at top level.
+
+## Sandbox context: declare before you touch
+
+Dynamic plugin halves never receive the raw Cordis root context. `dsh-cordis-host-runner` hands each half a sandbox context facade: a whitelist `Proxy` that only exposes a fixed verb set (`CTX_VERBS`, `TIMER_VERBS`). Two consequences:
+
+- Touch only services you declared in `inject`. Reaching for an undeclared service hits an internal guard and rejects.
+- Framework internals (`root`, `fiber`, `registry`, `extend`, `plugin`, and the private `internals` bag) are withheld by design. There is no supported `internals.logger`; use `ctx.logger`.
+
+So the plugin `apply` is not called with the module's own context either — it runs as `objectPlugin.apply(sandboxContext(ctx, ...), config)`. Anything absent from that facade is unavailable, not merely undocumented.

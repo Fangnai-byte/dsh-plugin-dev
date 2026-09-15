@@ -49,7 +49,7 @@ dsh 插件是 npm 包，安装位置是 dsh 的插件目录与 profile，而不�
 
 - 插件声明契约（`package.json` 中的 `dsh.bundle.patch` 与 `dsh.client`，含必填的 `platform`）
 - 挂载方式（`cordis.patch.yml` 的 `insert` 挂行，以及 patch 整体替换而非字段合并的语义）
-- 宿主半侧（`apply` / `inject` / `ctx.effect`、`ctx.webServer.register` 的重复注册异常、日志前缀）
+- 宿主半侧（`apply` / `inject` / `ctx.effect`、沙箱 ctx 白名单与未声明服务的拒绝、`ctx.webServer.register` 的重复注册异常、日志前缀）
 - Web 客户端半侧（`window.__ModuleLoader__.load` 的懒加载 CJS 工厂格式、共享模块基座与依赖限制）
 - 安装与验证（插件目录、profile 链接、`dsh.profile.bundles` 三者同时成立，再打真实路由看返回）
 

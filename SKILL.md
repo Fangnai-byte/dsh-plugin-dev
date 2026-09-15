@@ -68,7 +68,8 @@ export function apply(ctx, config) {
 
 - Register every side effect (timers, listeners, files, routes) through `ctx.effect` so unloading restores state.
 - Guard `ctx.webServer.register` with try/catch: duplicate `(kind, path)` pairs throw.
-- Use `internals.logger ?? ctx.logger` and a stable `[plugin-name]` prefix, so logs are greppable in the harness output.
+- Log through `ctx.logger` with a stable `[plugin-name]` prefix, so logs are greppable in the harness output.
+- Declare every service you touch in `inject`. Each half runs against a sandbox context facade, so undeclared services and framework internals are simply unavailable — see the sandbox section in `references/host-half.md`.
 
 ## Implement the web client half
 

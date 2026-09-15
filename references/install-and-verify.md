@@ -22,8 +22,8 @@ Make installers idempotent: re-running must not duplicate bundle entries or fail
 After restarting the harness:
 
 - Grep the harness stdout for the plugin's `[name]` log prefix; a host half that loaded always logs.
-- Request the plugin's routes on the harness port, for example `http://127.0.0.1:3080/<plugin-route>`, and confirm a real payload rather than a 404 from the fallback handler.
-- Confirm first-run state was created, such as `$DSH_HOME/storages/<name>/config.json`. Its absence after a restart means the plugin never ran.
+- Request the plugin's routes on the harness port — `3080` is the default, configurable via `ctx.webStartup.port` — for example `http://127.0.0.1:3080/<plugin-route>`, and confirm a real payload rather than a 404 from the fallback handler.
+- Confirm first-run state was created. Check the artifacts your own plugin declares (its log line, the files or directories it writes), not a path you assume the host provides: the shared storage root is `$DSH_HOME/storages`, and a JSON storage unit lands as `<root>/<unit>.json` for single-record mode or `<root>/<unit>/<table>/<key>.json` plus `global.json` for per-record mode. A plugin that keeps its config under `$DSH_HOME/storages/<name>/config.json` chose that layout itself, so it is not a general first-run probe. Absence after a restart still means the plugin never ran.
 - Check that no duplicate-route throw appeared in the logs.
 
 ## Worked example: dsh-budget
