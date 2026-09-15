@@ -38,10 +38,13 @@ references/
 dsh 插件是 npm 包，安装位置是 dsh 的插件目录与 profile，而不是 AstrBot：
 
 ```
-<dsh>/plugins/<plugin-name>/                插件本体
-<dsh>/profiles/<profile>/node_modules/...   profile 里的链接
-<dsh>/profiles/<profile>/package.json       dsh.profile.bundles 与 dependencies
+$DSH_HOME/plugins/<plugin-name>/                插件本体
+$DSH_HOME/profiles/<profile>/node_modules/...   profile 里的链接
+$DSH_HOME/profiles/<profile>/package.json       dsh.profile.bundles 与 dependencies
 ```
+
+注意 `$DSH_HOME` 与 dsh 的安装目录是两个不同的位置：`$DSH_HOME` 一般是 `%USERPROFILE%\.dsh`，
+`plugins/`、`profiles/`、`storages/` 都在它下面；安装目录只放 dsh 自身的 npm 包，不是插件该待的地方。
 
 三处同时成立插件才会被加载，具体步骤与判据见 `references/install-and-verify.md`。
 
@@ -49,7 +52,7 @@ dsh 插件是 npm 包，安装位置是 dsh 的插件目录与 profile，而不�
 
 - 插件声明契约（`package.json` 中的 `dsh.bundle.patch` 与 `dsh.client`，含必填的 `platform`）
 - 挂载方式（`cordis.patch.yml` 的 `insert` 挂行，以及 patch 整体替换而非字段合并的语义）
-- 宿主半侧（`apply` / `inject` / `ctx.effect`、沙箱 ctx 白名单与未声明服务的拒绝、`ctx.webServer.register` 的重复注册异常、日志前缀）
+- 宿主半侧（`apply` / `inject` / `ctx.effect`、`ctx.webServer.register` 的重复注册异常、日志前缀，以及普通 profile 插件与动态 Cordis 包两条加载路径的 ctx 差异）
 - Web 客户端半侧（`window.__ModuleLoader__.load` 的懒加载 CJS 工厂格式、共享模块基座与依赖限制）
 - 安装与验证（插件目录、profile 链接、`dsh.profile.bundles` 三者同时成立，再打真实路由看返回）
 
@@ -59,8 +62,9 @@ dsh 插件是 npm 包，安装位置是 dsh 的插件目录与 profile，而不�
   `README.zh.md` 并 grep `lib/index.js` 复核，旧写法会静默失效。
 - **不以第三方文档为准**：本仓库刻意不引用任何第三方教程，避免把过期写法带进来。
 - **退出码不等于装好**：安装器返回 0 只说明文件动过，必须按 `install-and-verify.md` 复核三判据，
-  并以真实路由的返回内容与首次生成的运行态存储作为最终证据。
-- 所有示例路径都用 `<dsh>` / `<AstrBot>` 占位，指安装根目录，不绑定具体机器。
+  并以启动是否正常完成（`assertEntriesActivated` 门禁）加上真实路由的返回内容、首次生成的运行态存储作为最终证据；
+  日志不是判据，本机安装没有 console exporter。
+- 所有示例路径都用 `<dsh>`（安装目录）、`$DSH_HOME`（用户数据目录，通常是 `%USERPROFILE%\.dsh`）与 `<AstrBot>` 占位，不绑定具体机器。
 
 ## 许可
 

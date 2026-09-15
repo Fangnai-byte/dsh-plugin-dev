@@ -28,7 +28,7 @@ window.__ModuleLoader__.load({
 
 ## Available modules
 
-The shared base (`PLATFORM_MODULES`) covers React, Cordis, and static UI libraries. Anything else must either be bundled into the client file or declared as an external the host can provide. When in doubt, ship zero-dependency DOM code.
+The shared base covers React, Cordis, and static UI libraries. `PLATFORM_MODULES` is the README's label for it; the implementation field the client loader reads is `staticModules`. Anything else must either be bundled into the client file or declared as an external the host can provide. When in doubt, ship zero-dependency DOM code.
 
 ## URL limits
 

@@ -21,10 +21,11 @@ Make installers idempotent: re-running must not duplicate bundle entries or fail
 
 After restarting the harness:
 
-- Grep the harness stdout for the plugin's `[name]` log prefix; a host half that loaded always logs.
+- Boot completion is the gate. A bundled plugin whose entry fails to activate aborts boot outright (`assertEntriesActivated` in `dsh-app-boot`), so a harness reaching normal startup has activated every entry, including yours. A plugin missing from `dsh.profile.bundles` produces no output at all — silence is not success.
+- Do not judge by grepping stdout. The install ships no console exporter, `ctx.logger` writes only to a 1000-entry in-memory buffer, and loader-level load logs require `enableLogs`, which defaults to off.
 - Request the plugin's routes on the harness port — `3080` is the default, configurable via `ctx.webStartup.port` — for example `http://127.0.0.1:3080/<plugin-route>`, and confirm a real payload rather than a 404 from the fallback handler.
-- Confirm first-run state was created. Check the artifacts your own plugin declares (its log line, the files or directories it writes), not a path you assume the host provides: the shared storage root is `$DSH_HOME/storages`, and a JSON storage unit lands as `<root>/<unit>.json` for single-record mode or `<root>/<unit>/<table>/<key>.json` plus `global.json` for per-record mode. A plugin that keeps its config under `$DSH_HOME/storages/<name>/config.json` chose that layout itself, so it is not a general first-run probe. Absence after a restart still means the plugin never ran.
-- Check that no duplicate-route throw appeared in the logs.
+- Confirm first-run state was created. Check the artifacts your own plugin declares (the files or directories it writes), not a path you assume the host provides: the shared storage root is `$DSH_HOME/storages`, and a JSON storage unit lands as `<root>/<unit>.json` for single-record mode or `<root>/<unit>/<table>/<key>.json` plus optional `global.json` for per-record mode. A plugin that keeps its config under `$DSH_HOME/storages/<name>/config.json` chose that layout itself, so it is not a general first-run probe. Absence after a restart still means the plugin never ran.
+- Check that no duplicate-route throw appeared. An unguarded duplicate `(kind, path)` throws during registration; if boot dies while activating your entry, suspect this first.
 
 ## Worked example: dsh-budget
 
@@ -37,7 +38,7 @@ After restarting the harness:
 
 | Symptom | Likely cause |
 | --- | --- |
-| No `[name]` log at all | Not in `dsh.profile.bundles`, or the profile was not restarted |
+| No effect at all, harness starts fine | Not in `dsh.profile.bundles`, or the profile was not restarted |
 | Route falls through to the default handler | Route never registered, or the try/catch swallowed a duplicate |
 | Client half missing in the browser | No `dsh.client.platform`, or the client entry file was not shipped |
 | Config edits ignored | Edited the wrong patch layer, or `patchReload` is not live and no restart happened |

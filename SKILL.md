@@ -68,8 +68,8 @@ export function apply(ctx, config) {
 
 - Register every side effect (timers, listeners, files, routes) through `ctx.effect` so unloading restores state.
 - Guard `ctx.webServer.register` with try/catch: duplicate `(kind, path)` pairs throw.
-- Log through `ctx.logger` with a stable `[plugin-name]` prefix, so logs are greppable in the harness output.
-- Declare every service you touch in `inject`. Each half runs against a sandbox context facade, so undeclared services and framework internals are simply unavailable — see the sandbox section in `references/host-half.md`.
+- Log through `ctx.logger` with a stable `[plugin-name]` prefix. Note that logs are not a verification signal: the install has no console exporter and `ctx.logger` only fills a 1000-entry in-memory buffer.
+- Declare every service you touch in `inject`: Cordis only exposes injected services, and touching an undeclared one throws `cannot get property without inject`. Plain profile plugins run on the normal fiber context; the restricted sandbox facade belongs to dynamic Cordis packages (`cordis_define` / `cordis_run`) only — see `references/host-half.md`.
 
 ## Implement the web client half
 
@@ -89,7 +89,7 @@ Do not depend on arbitrary packages: only the shared platform module base is ava
 - Missing `lib/client.js` or an equivalent client entry fails the build with an explicit package list; ship the built file, do not rely on a build step at load time.
 - A single combo URL must stay under 3 KiB; split assets into separate routes instead of one giant URL.
 - `llm/stream` is a waterfall hook. Preserve the protocol invariant that final usage arrives before the terminating finish; do not emit a finish early when filtering chunks.
-- Do not report success from the installer's exit code alone. Always re-check the three install judgments.
+- Do not report success from the installer's exit code alone. Always re-check the three install judgments, then confirm at runtime by boot completion and a real route response.
 
 ## Read the references
 
