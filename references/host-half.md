@@ -6,9 +6,12 @@ Verified against `@deepseek-ai/dsh-host-webserver` and `@deepseek-ai/dsh-llm` in
 
 `register({ kind, path, handler })`:
 
-- `kind` is `"exact"` or `"prefix"`.
+- `kind` is `"exact"` or `"prefix"`. Both live in their own table (`this.exact` / `this.prefixes`), and a duplicate path within the same table throws `webserver: duplicate <kind> route "<path>"`.
 - Matching order: exact match first, then longest prefix, then the fallback handler.
-- A duplicate `(kind, path)` pair throws immediately. Wrap registration in try/catch and degrade to a no-op so one bad plugin cannot take down the host.
+- It returns a disposer that removes the route. Hand it to `ctx.effect` so unload actually unregisters.
+- Two more seats exist on the same service: `registerUpgrade({ path, handler })` for an exact-path HTTP upgrade (one socket, one protocol owner, duplicate path throws) and `registerFallback(handler)` for unmatched requests (single owner; a second registration throws). Do not claim the fallback seat from a plugin unless you really are the last responder.
+
+Wrap registration in try/catch and degrade to a no-op so one bad plugin cannot take down the host.
 
 Handlers serve whatever the plugin needs: JSON status endpoints, images, per-file asset routes. Prefer one route per file over packing many assets into a query string.
 
@@ -32,7 +35,7 @@ ctx.on('llm/stream', (options, next) => {
 ## Effect and logging conventions
 
 - Register timers, listeners, file handles, and routes through `ctx.effect` so plugin unload restores the prior state instead of leaking.
-- Log through `ctx.logger` with a `[plugin-name]` prefix.
+- Log through `ctx.logger` with a `[plugin-name]` prefix. Treat logs as diagnostics only: the install ships no console exporter, so `ctx.logger` output never becomes a verification signal. (An earlier revision of this skill claimed a fixed 1000-entry in-memory ring; that number was checked on 0.1.x and is not re-verified on 0.2.0-rc.2 — just do not depend on the buffer size.)
 
 ## Injection
 
