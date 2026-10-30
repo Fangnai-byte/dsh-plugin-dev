@@ -45,11 +45,11 @@ ctx.on('llm/stream', (options, next) => {
 
 Do not conflate them. The context a half receives depends on which path mounted it.
 
-- **Plain profile plugin** — a package listed in `dsh.profile.bundles`. `cordis-plugin-loader` mounts it through `registry.plugin`, and `apply` receives the ordinary Cordis fiber context: `ctx.logger`, `ctx.inject`, `ctx.effect`, `ctx.on` and the rest are all present, and any service registered on the root is reachable once declared.
-- **Dynamic Cordis package** — code created at runtime via `cordis_define` / `cordis_run`. Only these run inside `dsh-cordis-host-runner` (service `dynamicCordisRunner`, mounted by `dsh-web-app`'s `cordis.patch.yml`), which hands each half a sandbox context facade: a whitelist `Proxy` exposing a fixed verb set (`CTX_VERBS`, `TIMER_VERBS`).
+- Plain profile plugin. A package listed in `dsh.profile.bundles`. `cordis-plugin-loader` mounts it through `registry.plugin`, and `apply` receives the ordinary Cordis fiber context: `ctx.logger`, `ctx.inject`, `ctx.effect`, `ctx.on` and the rest are all present, and any service registered on the root is reachable once declared.
+- Dynamic Cordis package. Code created at runtime via `cordis_define` / `cordis_run`. Only these run inside `dsh-cordis-host-runner` (service `dynamicCordisRunner`, mounted by `dsh-web-app`'s `cordis.patch.yml`), which hands each half a sandbox context facade: a whitelist `Proxy` exposing a fixed verb set (`CTX_VERBS`, `TIMER_VERBS`).
 
 Consequences:
 
 - The sandbox facade is a dynamic-package restriction only. It does not expose `logger` or `inject`, so a dynamic half cannot use them — a normally bundled plugin uses both freely. Everything in this reference that mentions sandboxing applies to the dynamic path alone.
 - Declaring services in `inject` still matters everywhere, but the mechanism is Cordis' own proxy rule: touching an undeclared service throws `cannot get property without inject`. That is not a sandbox behavior.
-- Framework internals (`root`, `fiber`, `registry`, `extend`, `plugin`) are withheld inside the sandbox by design. There is no supported `internals.logger` on any path. A handful of first-party packages accept a third `internals` argument as a test probe (`dsh-llm-retry`, `dsh-web-app`, `dsh-headless`); `dsh-budget` even reads `internals.logger ?? ctx.logger`, where the fallback is what actually runs. Use `ctx.logger`.
+- Framework internals (`root`, `fiber`, `registry`, `extend`, `plugin`) are withheld inside the sandbox by design. There is no supported `internals.logger` on any path. A handful of first-party packages accept a third `internals` argument as a test probe (`dsh-llm-retry`, `dsh-web-app`, `dsh-headless`); some first-party plugins read `internals.logger ?? ctx.logger`, where the fallback is what actually runs. Use `ctx.logger`.

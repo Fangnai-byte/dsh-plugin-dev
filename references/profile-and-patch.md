@@ -5,7 +5,7 @@ Verified against the local `@deepseek-ai/dsh` CLI package.
 ## Layout
 
 - `$DSH_HOME` (usually `%USERPROFILE%\.dsh`): `plugins/`, `storages/`, `profiles/<name>/`, and optionally a home-level
-  `cordis.patch.yml`. The home-level file is optional — a stock install does not ship one, so do not assume it exists.
+  `cordis.patch.yml`. The home-level file is optional. A stock install does not ship one, so do not assume it exists.
 - `profiles/<name>/package.json` holds `dsh.profile.bundles` (the combo list) and `dependencies`.
 - `profiles/<name>/cordis.patch.yml` is the profile-level patch file.
 - `profiles/<name>/node_modules/` holds plugin links.

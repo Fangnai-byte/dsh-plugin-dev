@@ -75,7 +75,7 @@ robocopy "<repo>\dsh-plugin-dev" "$env:USERPROFILE\.dsh\skills\dsh-plugin-dev" /
 - 不以第三方文档为准。本仓库刻意不引用任何第三方教程，避免把过期写法带进来。
 - 退出码不等于装好。安装器返回 0 只说明文件动过，必须按 `install-and-verify.md` 复核三判据，
   并以真实路由的返回内容、首次生成的运行态存储作为最终证据。
-  启动是否正常完成**不能**当判据：0.2.0 起只有核心条目的失败才会中止启动（见 `install-and-verify.md`），
+  启动是否正常完成不能当判据。0.2.0 起只有核心条目的失败才会中止启动（见 `install-and-verify.md`），
   第三方插件的条目挂掉只打一条 warning；日志也不是判据，本机安装没有 console exporter。
 - 所有示例路径都用 `<dsh>`（安装目录）、`$DSH_HOME`（用户数据目录，通常是 `%USERPROFILE%\.dsh`）与 `<AstrBot>` 占位，不绑定具体机器。
 

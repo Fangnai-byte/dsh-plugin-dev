@@ -21,18 +21,18 @@ Make installers idempotent: re-running must not duplicate bundle entries or fail
 
 After restarting the harness:
 
-- Boot completion is **not** a gate for your plugin (verified on 0.2.0-rc.2). `dsh-app-boot`'s `auditStartupEntries` rejects startup only when a **required** entry is inactive, and that required set is a hardcoded list of DSH's own entries (`agent-loop`, `webserver`, `modules`, `connection`, `headless-runner`, `acp`, `sdk-jsonrpc-server`) plus the bootstrap Include. A third-party entry that fails to activate only produces `warning: N entries did not activate`, and its siblings keep running. So a harness that reached normal startup may still have silently skipped your plugin. (In 0.1.x this was `assertEntriesActivated` and did abort boot; that function no longer exists.) A plugin missing from `dsh.profile.bundles` produces no output at all, and silence is not success either.
+- Boot completion is not a gate for your plugin (verified on 0.2.0-rc.2). `dsh-app-boot`'s `auditStartupEntries` rejects startup only when a **required** entry is inactive, and that required set is a hardcoded list of DSH's own entries (`agent-loop`, `webserver`, `modules`, `connection`, `headless-runner`, `acp`, `sdk-jsonrpc-server`) plus the bootstrap Include. A third-party entry that fails to activate only produces `warning: N entries did not activate`, and its siblings keep running. So a harness that reached normal startup may still have silently skipped your plugin. (In 0.1.x this was `assertEntriesActivated` and did abort boot; that function no longer exists.) A plugin missing from `dsh.profile.bundles` produces no output at all, and silence is not success either.
 - Do not judge by grepping stdout. The install ships no console exporter (so `ctx.logger` never reaches the terminal), and loader-level load logs require `enableLogs`, which defaults to off. The in-memory buffer size is not a documented contract either — do not size anything against it.
-- Request the plugin's routes on the harness port — `3080` is the default, configurable via `ctx.webStartup.port` — for example `http://127.0.0.1:3080/<plugin-route>`, and confirm a real payload rather than a 404 from the fallback handler.
+- Request the plugin's routes on the harness port. It defaults to `3080` (configurable via `ctx.webStartup.port`), so for example `http://127.0.0.1:3080/<plugin-route>`, and confirm a real payload rather than a 404 from the fallback handler.
 - Confirm first-run state was created. Check the artifacts your own plugin declares (the files or directories it writes), not a path you assume the host provides: the shared storage root is `$DSH_HOME/storages`, and a JSON storage unit lands as `<root>/<unit>.json` for single-record mode or `<root>/<unit>/<table>/<key>.json` plus optional `global.json` for per-record mode. A plugin that keeps its config under `$DSH_HOME/storages/<name>/config.json` chose that layout itself, so it is not a general first-run probe. Absence after a restart still means the plugin never ran.
 - Check that your `apply` did not throw. A duplicate `(kind, path)` or an undeclared service (`cannot get property without inject`) fails the entry during activation. For a third-party entry that failure is a warning, not a dead boot — you will see `N entries did not activate` and simply no route.
 
-## Worked example: dsh-budget
+## Worked example: dsh-example
 
-- Host routes: `/__budget-status`, `/dsh-budget/mea.png`, `/dsh-budget/voice-list`, and one route per voice file.
+- Host routes: `/__example-status`, `/dsh-example/icon.png`, `/dsh-example/voice-list`, and one route per voice file.
 - The status route returning JSON with `day`, `budget`, `spent`, `remaining`, and `configPath` proves both the host half and its storage layer are live.
 - The voice-list route proves asset routes registered without exceeding the per-URL limit.
-- Its only side effect on the harness is the `[dsh-budget]` log prefix plus the storage directory; anything else means the wrong plugin loaded.
+- Its only side effect on the harness is the `[dsh-example]` log prefix plus the storage directory; anything else means the wrong plugin loaded.
 
 ## Common failure signatures
 
