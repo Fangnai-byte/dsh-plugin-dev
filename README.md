@@ -1,6 +1,6 @@
 # dsh-plugin-dev
 
-DeepSeek Harness（dsh）插件开发参考 Skill（以本机安装的 dsh 源码为唯一依据，当前核对版本 0.1.2-rc.1）。
+DeepSeek Harness（dsh）插件开发参考 Skill（以本机安装的 dsh 源码为唯一依据，当前核对版本 0.2.0-rc.2）。
 
 写这个 Skill 的起因是 dsh 的插件机制公开文档很少，能搜到的说法普遍停留在“复制文件就算装好”的层面，
 而实际上 dsh 的插件是普通的 npm 包，由宿主半侧与 Web 客户端半侧分别加载，安装判据、patch 语义、
@@ -70,12 +70,13 @@ robocopy "<repo>\dsh-plugin-dev" "$env:USERPROFILE\.dsh\skills\dsh-plugin-dev" /
 
 ## 使用注意
 
-- 版本敏感。本 Skill 核对的是 dsh `0.1.2-rc.1`。dsh 升级后请以线上源码为准，动笔前先读安装目录里的
+- 版本敏感。本 Skill 核对的是 dsh `0.2.0-rc.2`。dsh 升级后请以线上源码为准，动笔前先读安装目录里的
   `README.zh.md` 并 grep `lib/index.js` 复核，旧写法会静默失效。
 - 不以第三方文档为准。本仓库刻意不引用任何第三方教程，避免把过期写法带进来。
 - 退出码不等于装好。安装器返回 0 只说明文件动过，必须按 `install-and-verify.md` 复核三判据，
-  并以启动是否正常完成（`assertEntriesActivated` 门禁）加上真实路由的返回内容、首次生成的运行态存储作为最终证据；
-  日志不是判据，本机安装没有 console exporter。
+  并以真实路由的返回内容、首次生成的运行态存储作为最终证据。
+  启动是否正常完成**不能**当判据：0.2.0 起只有核心条目的失败才会中止启动（见 `install-and-verify.md`），
+  第三方插件的条目挂掉只打一条 warning；日志也不是判据，本机安装没有 console exporter。
 - 所有示例路径都用 `<dsh>`（安装目录）、`$DSH_HOME`（用户数据目录，通常是 `%USERPROFILE%\.dsh`）与 `<AstrBot>` 占位，不绑定具体机器。
 
 ## 许可
