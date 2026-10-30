@@ -1,8 +1,8 @@
 # dsh-plugin-dev
 
-DeepSeek Harness（dsh）插件开发参考 Skill（**以本机安装的 dsh 源码为唯一依据**，当前核对版本 **0.1.2-rc.1**）。
+DeepSeek Harness（dsh）插件开发参考 Skill（以本机安装的 dsh 源码为唯一依据，当前核对版本 0.1.2-rc.1）。
 
-写这个 Skill 的起因：dsh 的插件机制公开文档很少，能搜到的说法普遍停留在“复制文件就算装好”的层面，
+写这个 Skill 的起因是 dsh 的插件机制公开文档很少，能搜到的说法普遍停留在“复制文件就算装好”的层面，
 而实际上 dsh 的插件是普通的 npm 包，由宿主半侧与 Web 客户端半侧分别加载，安装判据、patch 语义、
 客户端模块契约都有明确的硬性约束。照记忆动笔，写出来的插件最常见的结局是“装完毫无反应”。
 本仓库里的每个字段名、函数签名与判据，都取自本机 `dsh` 安装目录中的真实源码与运行态验证；
@@ -13,7 +13,7 @@ DeepSeek Harness（dsh）插件开发参考 Skill（**以本机安装的 dsh 源
 ```
 SKILL.md                          总览、开发工作流八步、双半侧取舍、常见故障
 references/
-├── host-half.md                  宿主半侧：webServer 注册种类与优先级、llm/stream 语义、ctx.effect 与日志约定
+├── host-half.md                  宿主半侧，含 webServer 注册种类与优先级、llm/stream 语义、ctx.effect 与日志约定
 ├── client-half.md                parseDshClient 字段契约、模块加载器 bundle 格式、共享模块基座、combo URL 上限
 ├── profile-and-patch.md          profile 目录布局、bundle 解析顺序、patch 覆盖语义、dsh plugin 转发与热重载
 └── install-and-verify.md         安装步骤、三判据、以及打真实路由的 HTTP 验证命令
@@ -21,7 +21,7 @@ references/
 
 ## 安装
 
-**先分清两个东西**：本仓库是一个 **AstrBot Skill**（一份给模型看的参考资料），它的**内容**讲的是 dsh 插件开发。
+先分清两个东西。本仓库是一个 AstrBot Skill，也就是一份给模型看的参考资料，它的内容讲的是 dsh 插件开发。
 它本身不是 dsh 插件，装进 dsh 不会有任何效果；dsh 插件另有自己的位置（见下一节）。
 
 把它作为 Skill 装进 AstrBot 的 skills 目录：
@@ -43,10 +43,22 @@ $DSH_HOME/profiles/<profile>/node_modules/...   profile 里的链接
 $DSH_HOME/profiles/<profile>/package.json       dsh.profile.bundles 与 dependencies
 ```
 
-注意 `$DSH_HOME` 与 dsh 的安装目录是两个不同的位置：`$DSH_HOME` 一般是 `%USERPROFILE%\.dsh`，
+注意 `$DSH_HOME` 和 dsh 的安装目录是两个不同的位置，前者一般是 `%USERPROFILE%\.dsh`，
 `plugins/`、`profiles/`、`storages/` 都在它下面；安装目录只放 dsh 自身的 npm 包，不是插件该待的地方。
 
 三处同时成立插件才会被加载，具体步骤与判据见 `references/install-and-verify.md`。
+
+### 更新已安装的副本
+
+改完这份 Skill 之后，把仓库内容同步到已安装目录（`%USERPROFILE%\.dsh\skills\dsh-plugin-dev\`）。
+用 robocopy，别用 `copy`，它会只复制真正变过的文件：
+
+```powershell
+robocopy "<repo>\dsh-plugin-dev" "$env:USERPROFILE\.dsh\skills\dsh-plugin-dev" /E /XD .git
+```
+
+如果对方说 `PermissionError` 或者“拒绝访问”，先看是不是文件正被占用，重跑一次通常就好了。
+不要一上来就往权限或沙箱上归因（我们踩过这个坑，把占用误判成了 ACL）。
 
 ## 覆盖范围
 
@@ -58,10 +70,10 @@ $DSH_HOME/profiles/<profile>/package.json       dsh.profile.bundles 与 dependen
 
 ## 使用注意
 
-- **版本敏感**：本 Skill 核对的是 dsh `0.1.2-rc.1`。dsh 升级后请以线上源码为准，动笔前先读安装目录里的
+- 版本敏感。本 Skill 核对的是 dsh `0.1.2-rc.1`。dsh 升级后请以线上源码为准，动笔前先读安装目录里的
   `README.zh.md` 并 grep `lib/index.js` 复核，旧写法会静默失效。
-- **不以第三方文档为准**：本仓库刻意不引用任何第三方教程，避免把过期写法带进来。
-- **退出码不等于装好**：安装器返回 0 只说明文件动过，必须按 `install-and-verify.md` 复核三判据，
+- 不以第三方文档为准。本仓库刻意不引用任何第三方教程，避免把过期写法带进来。
+- 退出码不等于装好。安装器返回 0 只说明文件动过，必须按 `install-and-verify.md` 复核三判据，
   并以启动是否正常完成（`assertEntriesActivated` 门禁）加上真实路由的返回内容、首次生成的运行态存储作为最终证据；
   日志不是判据，本机安装没有 console exporter。
 - 所有示例路径都用 `<dsh>`（安装目录）、`$DSH_HOME`（用户数据目录，通常是 `%USERPROFILE%\.dsh`）与 `<AstrBot>` 占位，不绑定具体机器。
